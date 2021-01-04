@@ -22,7 +22,7 @@ while True:
     # update scroll height each time after scrolled, as the scroll height can change after we scrolled the page
     scroll_height = driver.execute_script("return document.body.scrollHeight;")
     # Break the loop when the height we need to scroll to is larger than the total scroll height
-    if (screen_height) * i > scroll_height or scrolls == 2:  # limits scrolls
+    if (screen_height) * i > scroll_height or scrolls == 10:  # limits scrolls
         break
 
 posts = driver.find_elements_by_class_name('topic-title')
