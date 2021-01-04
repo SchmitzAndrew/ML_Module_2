@@ -6,7 +6,7 @@ URL = 'https://forum.level1techs.com/'
 PATH = 'M:\Programming\Python Support Files\chromedriver_win32\chromedriver.exe'
 driver = webdriver.Chrome(PATH)
 
-#infinite scroller from: https://medium.com/analytics-vidhya/using-python-and-selenium-to-scrape-infinite-scroll-web-pages-825d12c24ec7
+# infinite scroller from: https://medium.com/analytics-vidhya/using-python-and-selenium-to-scrape-infinite-scroll-web-pages-825d12c24ec7
 driver.get(URL)
 time.sleep(2)
 scroll_pause_time = 1
@@ -22,36 +22,77 @@ while True:
     # update scroll height each time after scrolled, as the scroll height can change after we scrolled the page
     scroll_height = driver.execute_script("return document.body.scrollHeight;")
     # Break the loop when the height we need to scroll to is larger than the total scroll height
-    if (screen_height) * i > scroll_height or scrolls == 2: #limits scrolls
+    if (screen_height) * i > scroll_height or scrolls == 2:  # limits scrolls
         break
 
 posts = driver.find_elements_by_class_name('topic-title')
-views_replies = driver.find_elements_by_class_name('number')
+replies_views = driver.find_elements_by_class_name('number')
 
-#cuts out pinned posts
+# cuts out pinned posts
 del posts[:2]
-del views_replies[:4]
+del replies_views[:4]
 
-
+#makes posts text
+cleaned_posts = []
 for t in posts:
-    print(t.text)
-for t in views_replies:
-    print(t.text)
+    cleaned_posts.append(t.text)
 
-#removes k
-for t in views_replies:
+#makes list of only text
+replies_views_text = []
+for t in replies_views:
+    replies_views_text.append(t.text)
+
+# removes k
+cleaned_replies_views = []
+for n in replies_views_text:
+    if "k" in n:
+        n = n.replace('k', '')
+        n = float(n) * 1000
+        n = int(n)
+        n = str(n)
+        cleaned_replies_views.append(n)
+    else:
+        cleaned_replies_views.append(n)
+
+
 
 views = []
 replies = []
-for n in views_replies
+index = 0
+
+for i in cleaned_replies_views:
+    if index % 2 == 0:
+        replies.append(cleaned_replies_views[index])
+    else:
+        views.append(cleaned_replies_views[index])
+    index += 1
+
 
 with open('data.csv', mode='w') as csv_file:
-    fieldnames = ['post name', 'views', 'replies']
-    data_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+    data_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
+    try:
+        data_writer.writerow(cleaned_posts)
+    except UnicodeEncodeError:
+        pass
+    data_writer.writerow(views)
+    data_writer.writerow(replies)
 
-    data_writer.writeheader()
-    data_writer.writerow()
+print(cleaned_posts)
+print(views)
+print(replies)
 
+#find reply to view ratio
+
+total_views = 0
+for i in views:
+    total_views += int(i)
+total_replies = 0
+
+for i in replies:
+    total_replies += int(i)
+
+view_to_reply = total_views / total_replies
+print(view_to_reply)
 
 
 
